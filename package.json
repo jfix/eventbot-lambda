@@ -1,0 +1,25 @@
+{
+  "name": "bday-lambda",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "sst test",
+    "start": "sst start",
+    "build": "sst build",
+    "deploy": "sst deploy",
+    "remove": "sst remove"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.94.1"
+  },
+  "dependencies": {
+    "@aws-cdk/core": "1.94.1",
+    "@serverless-stack/cli": "^0.10.4",
+    "@serverless-stack/resources": "^0.10.4",
+    "@slack/webhook": "^6.0.0",
+    "dayjs": "^1.10.4",
+    "dotenv": "^8.2.0",
+    "giphy-api": "^2.0.1",
+    "googleapis": "^68.0.0"
+  }
+}
