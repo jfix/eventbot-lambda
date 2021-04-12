@@ -56,35 +56,32 @@ const getBirthdays = async (opts) => {
         console.log('ERROR in getBirthdays: ' + error)
     }
 }
-// /**
-//  * Return a Markdown string of one or more people
-//  * @param {*} opts 
-//  * @returns 
-//  */
-// const findEvent = async (opts) => {
-//     try {
-//         if (!opts.date) throw Error("Missing 'date' value")
-//         if (!(opts.date || Object.prototype.toString.call(opts.date) !== "[object Date]")) throw Error("Wrong type, expected Date object")
-//         opts.timeMin = dayjs(opts.date).startOf('day').format() 
-//         opts.timeMax = dayjs(opts.date).endOf('day').format()
+/**
+ * Return a Markdown string of one or more people
+ * @param {*} opts 
+ * @returns String
+ */
+const findEvent = async (opts) => {
+    try {
+        if (!opts.date) throw Error("Missing 'date' value");
+        if (!(opts.date || Object.prototype.toString.call(opts.date) !== "[object Date]")) throw Error("Wrong type, expected Date object");
+        opts.timeMin = dayjs(opts.date).startOf('day').format();
+        opts.timeMax = dayjs(opts.date).endOf('day').format();
 
-//         console.log(`min: ${dayjs(opts.timeMin).format('LLLL')}\nmax: ${dayjs(opts.timeMax).format('LLLL')}`)
-//         console.log(`OPTS: ${JSON.stringify(opts, {}, 2)}`)
-//         const arr =  await listEvents(false, {}, opts)
-//         let birthdayChildren = ''
-//         console.log(`ARR: ${JSON.stringify(arr)}`)
-//         if (arr.length < 1) {
-//             return
-//         } else if (arr.length === 2) {
-//             birthdayChildren = arr.map((p) => `*${p.person}*`).join(' and ')
-//         } else {
-//             birthdayChildren = arr.map((p) => `*${p.person}*`).join(', ')
-//         }
-//         return birthdayChildren
-//     } catch (error) {
-//         console.log(`Error in findEvent: ${error}`)
-//     }
-// }
+        const arr =  await getBirthdays(opts);
+        let birthdayChildren = '';
+        if (arr.length < 1) {
+            return
+        } else if (arr.length === 2) {
+            birthdayChildren = arr.map((p) => `*${p.person}*`).join(' and ')
+        } else {
+            birthdayChildren = arr.map((p) => `*${p.person}*`).join(', ')
+        }
+        return birthdayChildren;
+    } catch (error) {
+        console.log(`ERROR in findEvent: ${error}`)
+    }
+}
 
 const addBirthday = async (data) => {
     try {
@@ -107,7 +104,7 @@ const addBirthday = async (data) => {
         })
         return true;
     } catch (error) {
-        console.log('ERROR in: ' + error)
+        console.log('ERROR in addBirthday: ' + error)
         return false;
     }
 };
@@ -116,5 +113,6 @@ module.exports = {
     getBirthdays,
     formatBirthdays,
     byPeople,
-    addBirthday
+    addBirthday,
+    findEvent
 }
