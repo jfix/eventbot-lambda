@@ -4,7 +4,7 @@ import { findEvent } from './libs/calendar';
 import { sendSlackMessage } from './libs/slack';
 import { image } from './libs/giphy';
 
-const handler = async () => {
+module.exports.handler = async () => {
     try {
         const date = new Date();
         // test date for two birthdays the same day
@@ -44,8 +44,4 @@ const handler = async () => {
         console.log(`ERROR IN CRONJOB HANDLER: ${error}`)
         return { statusCode: 500, body: error };
     }
-};
-
-module.exports = {
-    handler
 };

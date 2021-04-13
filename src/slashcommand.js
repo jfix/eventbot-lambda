@@ -3,7 +3,7 @@ dotenv.config();
 import { sendSlackMessage, isVerified } from './libs/slack';
 import { formatBirthdays, byPeople, getBirthdays } from './libs/calendar';
 
-const handler = async (event) => {
+module.exports.handler = async (event) => {
     try {
         if (event.requestContext.http.method !== 'POST') throw new Error('Message not allowed');
         event.rawBody = Buffer.from(event.body, 'base64').toString('utf8');
@@ -82,7 +82,3 @@ const handler = async (event) => {
     }
 };
 
-module.exports = {
-    handler,
-    // getBdayChildren: findEvent
-}
