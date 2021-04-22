@@ -38,9 +38,10 @@ const byPeople = (a, b) => {
 const getBirthdays = async (opts) => {
     try {
         const calendar = google.calendar({
-            version: 'v3', 
-            auth: googleAuth
+            version: 'v3',
+            auth: googleAuth()
         })
+
         let res = []
 
         const { data: { items } } = await calendar.events.list({

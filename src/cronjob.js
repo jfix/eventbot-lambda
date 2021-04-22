@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
 import { findEvent } from './libs/calendar';
 import { sendSlackMessage } from './libs/slack';
 import { image } from './libs/giphy';
@@ -9,6 +7,7 @@ module.exports.handler = async () => {
         const date = new Date();
         // test date for two birthdays the same day
         // const date = new Date(2021, 5, 19);
+
         const bdayChildren = await findEvent({date})
         if (!bdayChildren) {
             console.log(`No birthdays found for ${date}`)

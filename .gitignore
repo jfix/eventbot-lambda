@@ -27,3 +27,4 @@ src/libs/handler.js
 src/list.js
 src/slack.js
 test/testcal.js
+ssm-env.sh

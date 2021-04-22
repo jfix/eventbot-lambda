@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
 const crypto = require('crypto');
 const { IncomingWebhook } = require('@slack/webhook');
 

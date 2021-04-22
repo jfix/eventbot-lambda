@@ -1,11 +1,11 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
 import { sendSlackMessage, isVerified } from './libs/slack';
 import { formatBirthdays, byPeople, getBirthdays } from './libs/calendar';
 
 module.exports.handler = async (event) => {
     try {
         if (event.requestContext.http.method !== 'POST') throw new Error('Message not allowed');
+        if (!event.body) throw new Error('No POST body received.')
+        
         event.rawBody = Buffer.from(event.body, 'base64').toString('utf8');
         if (!isVerified(event)) throw new Error('You are not Slack?!')
 
@@ -71,6 +71,19 @@ module.exports.handler = async (event) => {
                             "text": "`/birthdays search [a date]` will try to find people for that date. For best results use this format '1 January'. 📅"
                         }
                     },
+                ]
+            }
+        } else {
+            // JUST ACKNOWLEDGING REQUEST (DEBUG)
+            message = {
+                blocks: [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "PONG"
+                        }
+                    }
                 ]
             }
         }

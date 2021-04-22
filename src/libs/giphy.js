@@ -1,6 +1,4 @@
-require('dotenv').config({ path: '../.env'});
 const giphy = require('giphy-api')(process.env.GIPHY_APIKEY);
-
 
 const randomBirthdayImage = async () => {
     try {
