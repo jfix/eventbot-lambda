@@ -57,6 +57,34 @@ const getBirthdays = async (opts) => {
         console.log('ERROR in getBirthdays: ' + error)
     }
 }
+const findBirthdayChildByDate = async (opts) => {
+    try {
+        if (!opts.date) throw Error("Missing 'date' value");
+        if (!(opts.date || Object.prototype.toString.call(opts.date) !== "[object Date]")) throw Error("Wrong type, expected Date object");
+        opts.timeMin = dayjs(opts.date).startOf('day').format();
+        opts.timeMax = dayjs(opts.date).endOf('day').format();
+
+        const arr =  await getBirthdays(opts);
+        return arr;
+    } catch (error) {
+        console.log(`ERROR in findBirthdayChildByDate: ${error}`);  
+    }
+};
+
+const findBirthdayChildByName = async (name) => {
+    try {
+        const n = name.toLowerCase();
+        const all = await getBirthdays({});
+        const matched = all.filter((b) => {
+            const nn = b.person.toLowerCase();
+            return (nn.includes(n))
+        })
+        return matched;
+    } catch (error) {
+        console.log(`ERROR in findBirthdayChildByName: ${error}`);
+    }
+};
+
 /**
  * Return a Markdown string of one or more people
  * @param {*} opts 
@@ -113,6 +141,8 @@ const addBirthday = async (data) => {
 module.exports = {
     getBirthdays,
     formatBirthdays,
+    findBirthdayChildByName,
+    findBirthdayChildByDate,
     byPeople,
     addBirthday,
     findEvent
