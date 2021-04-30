@@ -1,14 +1,34 @@
-const crypto = require('crypto');
-const { IncomingWebhook } = require('@slack/webhook');
-
-// const webhook = new IncomingWebhook(process.env.SLACK_WEBHOOK_URL);
+import crypto from 'crypto';
+import { IncomingWebhook } from '@slack/webhook';
+import got from 'got';
 
 const sendSlackMessage = async (webhookUrl, message) => {
-
     const webhook = new IncomingWebhook(webhookUrl);
 
     if (!message) return;
     await webhook.send(message);
+};
+
+const sendEphemeralSlackMessage = async (args) => {
+    try {
+        const opts = {
+            url: 'https://slack.com/api/chat.postEphemeral',
+            headers: {
+                'Authorization': `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            json: {
+                // channel: args.channel,
+                channel: 'C04P796PL',
+                user: args.user,
+                text: args.text
+            }
+        };
+        const response = await got.post(opts);
+        console.log(`RESP: ${JSON.stringify(response.body)}`)
+    } catch (error) {
+        console.log(`Error in sendEphemeralSlackMessage: ${error}`)
+    }
 };
 
 const isVerified = (req) => {
@@ -35,5 +55,6 @@ const isVerified = (req) => {
 
 module.exports = {
     sendSlackMessage,
+    sendEphemeralSlackMessage,
     isVerified
 };

@@ -5,6 +5,7 @@ aws ssm put-parameter --type String --name "CALENDAR_ID" --value "" --overwrite
 aws ssm put-parameter --type String --name "SLACK_WEBHOOK_URL" --value "" --overwrite
 aws ssm put-parameter --type String --name "GIPHY_APIKEY" --value "" --overwrite
 aws ssm put-parameter --type String --name "SLACK_SIGNING_SECRET" --value "" --overwrite
+aws ssm put-parameter --type String --name "SLACK_BOT_TOKEN" --value "" --overwrite
 aws ssm put-parameter --type String --name "GOOGLE_APPLICATION_CREDENTIALS_EMAIL" --value "" --overwrite
 aws ssm put-parameter --type String --name "GOOGLE_APPLICATION_CREDENTIALS_KEY" --value "" --overwrite
 aws ssm put-parameter --type String --name "GOOGLE_APPLICATION_CREDENTIALS_KEY_ID" --value "" --overwrite
@@ -14,6 +15,7 @@ aws ssm put-parameter --type String --name "GOOGLE_APPLICATION_CREDENTIALS_KEY_I
 # aws ssm put-parameter --type String --name "CALENDAR_ID" --value "" --overwrite
 # aws ssm put-parameter --type String --name "GOOGLE_APPLICATION_CREDENTIALS_KEY_ID" --value "" --overwrite
 # aws ssm put-parameter --type SecureString --name "SLACK_WEBHOOK_URL" --value "" --overwrite
+# aws ssm put-parameter --type SecureString --name "SLACK_BOT_TOKEN" --value "" --overwrite
 # aws ssm put-parameter --type SecureString --name "GIPHY_APIKEY" --value "" --overwrite
 # aws ssm put-parameter --type SecureString --name "SLACK_SIGNING_SECRET" --value "" --overwrite
 # aws ssm put-parameter --type SecureString --name "GOOGLE_APPLICATION_CREDENTIALS_EMAIL" --value "" --overwrite
