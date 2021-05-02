@@ -1,8 +1,7 @@
 import { sendSlackMessage, sendEphemeralSlackMessage, isVerified } from './libs/slack';
-import { formatBirthdays, findBirthdayChildByName, findBirthdayChildByDate, byPeople, getBirthdays } from './libs/calendar';
+import { formatBirthdays, findBirthdayChildByName, findBirthdayChildByDate, byPeople, getBirthdays, addBirthday } from './libs/calendar';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-require('dayjs/locale/fr');
 
 dayjs.extend(customParseFormat);
 
@@ -30,6 +29,12 @@ module.exports.handler = async (event) => {
         } else if (text.startsWith('find')) {
             message = await handleFind(text.substring(5));
         
+        
+        /////////////////////////////////////////////////////////////
+        // ADD
+        } else if (text.startsWith('add')) {
+            message = await handleAdd(text.substring(4));
+
         /////////////////////////////////////////////////////////////
         // HELP
         } else if (text.startsWith('help') || text.length === 0) {
@@ -62,6 +67,68 @@ module.exports.handler = async (event) => {
     }
 };
 
+const parseString = (s) => {
+    try {
+        // should match 'Name on Day Monthname YearMaybe
+        // e.g. Jakob on 31 March 2021, Jakob on 31 Mar
+        const re = /(.+)\s+on\s+([\d][\d]?)\s+([A-Z][a-z]+)\s*(\d{4})?/
+        const a = s.match(re);
+        if (!a) throw new Error('Wrong syntax, please use "Name" on "Date"');
+
+        const name = a[1]
+        // use the year if it has been provided (no importance because of yearly recurrence)
+        const y = a.length > 4 && a[4] ? a[4] : dayjs().format('YYYY');
+        // parse provided string date into dayjs if possible
+        const date = dayjs(`${a[2]} ${a[3]} ${y}`, ['D MMMM YYYY', 'D MMM YYYY'], true)
+        if (!date.isValid()) throw new Error('Date is not valid');
+
+        // return object with birthday child's name and formatted date
+        return { 
+            person: name,
+            date: date.format('YYYY-MM-DD')
+        }
+    } catch(e) {
+        console.log(`Error in parseString: ${e}`)
+        throw e;
+    }
+};
+
+const handleAdd = async (s) => {
+    try {
+        // is the string valid? should be composed of "Name Whatever" followed by "on" followed by 21 November
+        const birthday = parseString(s);
+
+        // if all is good call addBirthday
+        await addBirthday(birthday);
+
+        // return a message confirming the good news
+        return {
+            blocks: [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `The birthday of ${birthday.person} (${dayjs(birthday.date).format('D MMMM')}) was successfully added.`
+                    }
+                }
+            ]
+        }
+    } catch (error) {
+        console.log(`Error in handleFind: ${error}`);
+        return {
+            blocks: [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": `Argh, I didn't get that! 🙁 Please use the syntax '[Name] on [Date]'. Thanks! 🙏 (For what it's worth, here is the original error message: \`${error}\`)`
+                    }
+                }
+            ]
+        }
+    }
+};
+
 const handleHelp = () => {
     return {
         blocks: [
@@ -74,7 +141,8 @@ const handleHelp = () => {
             },
             {
                 "type": "divider"
-            },                    {
+            },
+            {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
@@ -86,6 +154,16 @@ const handleHelp = () => {
                 "text": {
                     "type": "mrkdwn",
                     "text": "`/birthdays find [a date]` will try to find people for that date. For best results use this format '1 January'. 📅"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`/birthdays add Le P'tit Jesus on 25 Dec` will add that name for the given date. For best results use this format '1 January'. 📅"
                 }
             },
             {

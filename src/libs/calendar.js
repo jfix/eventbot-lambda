@@ -112,12 +112,18 @@ const findEvent = async (opts) => {
     }
 }
 
+/**
+ * 
+ * @param {Object} data containing person and date
+ * date must use this format: 2021-12-31 
+ * @returns 
+ */
 const addBirthday = async (data) => {
     try {
         const calendar = google.calendar({
             version: 'v3', 
-            auth: googleAuth
-        })
+            auth: googleAuth()
+        });
         await calendar.events.insert({
             calendarId: process.env.CALENDAR_ID,
             requestBody: {
@@ -130,7 +136,7 @@ const addBirthday = async (data) => {
                     date: data.date
                 }
             }
-        })
+        });
         return true;
     } catch (error) {
         console.log('ERROR in addBirthday: ' + error)
