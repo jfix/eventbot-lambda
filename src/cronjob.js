@@ -11,9 +11,6 @@ module.exports.handler = async () => {
         const bdayChildren = await findEvent({date})
         if (!bdayChildren) {
             console.log(`No birthdays found for ${date}`)
-            await sendSlackMessage(process.env.SLACK_WEBHOOK_URL, {
-                text: "sorry no bdays today!"
-            })
             return {}
         }
         // get the GIPHY URL if PEOPLE were found
