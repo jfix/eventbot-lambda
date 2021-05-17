@@ -9,17 +9,16 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Europe/Paris");
 
-const getRandomEmoji = () =>  ["🎂", "🥳", "🍾", "🥂", "🎇", "🎉", "🎁"][7 * Math.random() | 0];
-
-const formatBirthdays = async (arr) => {
+const formatEvents = async (arr) => {
     let res = ""
-    arr.forEach((b) => {
-        res = `${res}${getRandomEmoji()} ${dayjs(b.date).format('D MMMM')}: ${b.name} · `
+    arr.forEach((event) => {
+        res = `${res}${dayjs(event.date).format('D MMMM')}: ${event.name} · `
     })
+    // remove ' · ' from the end
     return res.substring(0, res.length - 2);
 };
 
-const byPeople = (a, b) => {
+const byName = (a, b) => {
     const _a = a.name.toUpperCase()
     const _b = b.name.toUpperCase()
     if (_a < _b) return -1
@@ -55,7 +54,7 @@ const getEvents = async (opts) => {
             timeMax: opts.timeMax,
             maxResults: opts.maxItems,
         })
-        // extract only the name and the date
+        // extract only the name, the date and the description
         console.log(`GETEVENTS: ${JSON.stringify(items, {}, 2)}`)
         items.map((e) => res.push({name: e.summary, date: e.start.date, description: e.description}))
         return res;
@@ -63,7 +62,7 @@ const getEvents = async (opts) => {
         console.log('ERROR in getEvents: ' + error)
     }
 }
-const findBirthdayChildByDate = async (opts) => {
+const findEventByDate = async (opts) => {
     try {
         if (!opts.date) throw Error("Missing 'date' value");
         if (!(opts.date || Object.prototype.toString.call(opts.date) !== "[object Date]")) throw Error("Wrong type, expected Date object");
@@ -73,11 +72,11 @@ const findBirthdayChildByDate = async (opts) => {
         const arr =  await getEvents(opts);
         return arr;
     } catch (error) {
-        console.log(`ERROR in findBirthdayChildByDate: ${error}`);  
+        console.log(`ERROR in findEventByDate: ${error}`);  
     }
 };
 
-const findBirthdayChildByName = async (name) => {
+const findEventByName = async (name) => {
     try {
         const n = name.toLowerCase();
         const all = await getEvents({});
@@ -87,7 +86,7 @@ const findBirthdayChildByName = async (name) => {
         })
         return matched;
     } catch (error) {
-        console.log(`ERROR in findBirthdayChildByName: ${error}`);
+        console.log(`ERROR in findEventByName: ${error}`);
     }
 };
 
@@ -153,10 +152,10 @@ const addEvent = async (data) => {
 
 module.exports = {
     getEvents,
-    formatBirthdays,
-    findBirthdayChildByName,
-    findBirthdayChildByDate,
-    byPeople,
+    formatEvents,
+    findEventByName,
+    findEventByDate,
+    byName,
     addEvent,
     findEvent
 }

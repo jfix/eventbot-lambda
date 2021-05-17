@@ -27,7 +27,7 @@ module.exports.handler = async () => {
 
         const events = await getEvents({date});
 
-        if (!events) {
+        if (!events || events.length < 1) {
             console.log(`No events found for ${date}`);
             return {};
         }

@@ -1,5 +1,5 @@
 import { sendSlackMessage, sendEphemeralSlackMessage, isVerified } from './libs/slack';
-import { formatBirthdays, findBirthdayChildByName, findBirthdayChildByDate, byPeople, getBirthdays, addBirthday } from './libs/calendar';
+import { formatEvents, findEventByName, findEventByDate, byName, getEvents } from './libs/calendar';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
@@ -32,8 +32,8 @@ module.exports.handler = async (event) => {
         
         /////////////////////////////////////////////////////////////
         // ADD
-        } else if (text.startsWith('add')) {
-            message = await handleAdd(text.substring(4));
+        // } else if (text.startsWith('add')) {
+        //     message = await handleAdd(text.substring(4));
 
         /////////////////////////////////////////////////////////////
         // HELP
@@ -93,41 +93,41 @@ const parseString = (s) => {
     }
 };
 
-const handleAdd = async (s) => {
-    try {
-        // is the string valid? should be composed of "Name Whatever" followed by "on" followed by 21 November
-        const event = parseString(s);
+// const handleAdd = async (s) => {
+//     try {
+//         // is the string valid? should be composed of "Name Whatever" followed by "on" followed by 21 November
+//         const event = parseString(s);
 
-        // if all is good call addBirthday
-        await addBirthday(event);
+//         // if all is good call addBirthday
+//         await addBirthday(event);
 
-        // return a message confirming the good news
-        return {
-            blocks: [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": `The birthday of ${event.name} (${dayjs(event.date).format('D MMMM')}) was successfully added.`
-                    }
-                }
-            ]
-        }
-    } catch (error) {
-        console.log(`Error in handleFind: ${error}`);
-        return {
-            blocks: [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": `Argh, I didn't get that! 🙁 Please use the syntax '[Name] on [Date]'. Thanks! 🙏 (For what it's worth, here is the original error message: \`${error}\`)`
-                    }
-                }
-            ]
-        }
-    }
-};
+//         // return a message confirming the good news
+//         return {
+//             blocks: [
+//                 {
+//                     "type": "section",
+//                     "text": {
+//                         "type": "mrkdwn",
+//                         "text": `The birthday of ${event.name} (${dayjs(event.date).format('D MMMM')}) was successfully added.`
+//                     }
+//                 }
+//             ]
+//         }
+//     } catch (error) {
+//         console.log(`Error in handleFind: ${error}`);
+//         return {
+//             blocks: [
+//                 {
+//                     "type": "section",
+//                     "text": {
+//                         "type": "mrkdwn",
+//                         "text": `Argh, I didn't get that! 🙁 Please use the syntax '[Name] on [Date]'. Thanks! 🙏 (For what it's worth, here is the original error message: \`${error}\`)`
+//                     }
+//                 }
+//             ]
+//         }
+//     }
+// };
 
 const handleHelp = () => {
     return {
@@ -136,7 +136,7 @@ const handleHelp = () => {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "`/birthdays list` will show you a list of all birthdays we have on record. 🥳"
+                    "text": "`/events list` will show you a list of all events we have on record. 🤩"
                 }
             },
             {
@@ -146,24 +146,14 @@ const handleHelp = () => {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "`/birthdays find [a name]` will return the date for that person's birthday, if there is one. 🥂"
+                    "text": "`/events find [a name]` will return the date for that event, if there is one. 🤞"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "`/birthdays find [a date]` will try to find people for that date. For best results use this format '1 January'. 📅"
-                }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "`/birthdays add Le P'tit Jesus on 25 Dec` will add that name for the given date. For best results use this format '1 January'. 📅"
+                    "text": "`/events find [a date]` will try to find events for that date. For best results use this format '1 January'. 📅"
                 }
             },
             {
@@ -173,7 +163,7 @@ const handleHelp = () => {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "`/birthdays` or `/birthdays help` will display this message. Very self-referential and _meta_. 🙄"
+                    "text": "`/events` or `/events help` will display this message. Very self-referential and _meta_. 🙄"
                 }
             },
         ]
@@ -191,17 +181,17 @@ const handleFind = async (s) => {
     // date is not valid
     if (!d.isValid()) {
         // assume a name was passed in
-        const users = await findBirthdayChildByName(s);
+        const users = await findEventByName(s);
         // at least one person was found
         if (users.length > 0) {
-            const fbd = await formatBirthdays(users);
+            const fbd = await formatEvents(users);
             message = {
                 "blocks": [
                     {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": `Wow, *${users.length}* birthday${users.length > 1 ? 's' : ''} found for your search! 🎉`
+                            "text": `Wow, *${users.length}* day${users.length > 1 ? 's' : ''} found for your search! 🎉`
                         }
                     },
                     {
@@ -223,7 +213,7 @@ const handleFind = async (s) => {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": `Unfortunately, no birthday for '${s}' was found! :cry: Check the name maybe? 🤔`
+                            "text": `Unfortunately, no event for '${s}' was found! :cry: Check the name maybe? 🤔`
                         }
                     },
                 ]
@@ -233,7 +223,7 @@ const handleFind = async (s) => {
     
     // date is valid
     } else {
-        const users = await findBirthdayChildByDate({date: d.toDate()})
+        const users = await findEventByDate({date: d.toDate()})
         if (users.length > 0) {
             const u = users.map((u) => u.name);
             message = {
@@ -254,7 +244,7 @@ const handleFind = async (s) => {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": `Unfortunately, nobody we know will celebrate their birthday on ${d.format('D MMMM')}. :cry: Want to try another date? 🤔`
+                            "text": `Unfortunately, there's no nerdy event on ${d.format('D MMMM')}. :cry: Want to try another date? 🤔`
                         }
                     },
                 ]
@@ -266,15 +256,15 @@ const handleFind = async (s) => {
 
 const handleList = async () => {
     try {
-        const bdays = await getBirthdays({});
-        const formattedBirthdays = await formatBirthdays(bdays.sort(byPeople));
+        const events = await getEvents({});
+        const formattedEvents = await formatEvents(events.sort(byName));
         const message = {
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": `Wow, *${bdays.length}* birthdays! Here they are:`
+                        "text": `Wow, *${events.length}* special days! Here they are all:`
                     }
                 },
                 {
@@ -283,7 +273,7 @@ const handleList = async () => {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": formattedBirthdays
+                        "text": formattedEvents
                     }
                 }
             ]
