@@ -6,9 +6,8 @@ module.exports.googleAuth = () => {
     try {
         jwt = new JWT({
             // keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS_FILE,
-            email: process.env.GOOGLE_APPLICATION_CREDENTIALS_EMAIL,
-            key: process.env.GOOGLE_APPLICATION_CREDENTIALS_KEY.replace(/\\n/gm, '\n'),
-            // keyId: process.env.GOOGLE_APPLICATION_CREDENTIALS_KEY_ID,
+            email: process.env.EVENTBOT_GOOGLE_APPLICATION_CREDENTIALS_EMAIL,
+            key: process.env.EVENTBOT_GOOGLE_APPLICATION_CREDENTIALS_KEY.replace(/\\n/gm, '\n'),
             scopes: ['https://www.googleapis.com/auth/calendar'],
         });
         // console.log(`AUTH: ${JSON.stringify(jwt)}`)

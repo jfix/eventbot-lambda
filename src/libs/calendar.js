@@ -14,14 +14,14 @@ const getRandomEmoji = () =>  ["🎂", "🥳", "🍾", "🥂", "🎇", "🎉", "
 const formatBirthdays = async (arr) => {
     let res = ""
     arr.forEach((b) => {
-        res = `${res}${getRandomEmoji()} ${dayjs(b.date).format('D MMMM')}: ${b.person} · `
+        res = `${res}${getRandomEmoji()} ${dayjs(b.date).format('D MMMM')}: ${b.name} · `
     })
     return res.substring(0, res.length - 2);
 };
 
 const byPeople = (a, b) => {
-    const _a = a.person.toUpperCase()
-    const _b = b.person.toUpperCase()
+    const _a = a.name.toUpperCase()
+    const _b = b.name.toUpperCase()
     if (_a < _b) return -1
     if (_a > _b) return 1
     return 0
@@ -35,7 +35,7 @@ const byPeople = (a, b) => {
 //  * @returns {Array} - an array containing objects with `person` and `date` keys, order alphabetically
 //  * by the person's name.
 //  */
-const getBirthdays = async (opts) => {
+const getEvents = async (opts) => {
     try {
         const calendar = google.calendar({
             version: 'v3',
@@ -44,17 +44,23 @@ const getBirthdays = async (opts) => {
 
         let res = []
 
+        if (opts.date) {
+            opts.timeMin = dayjs(opts.date).startOf('day').format();
+            opts.timeMax = dayjs(opts.date).endOf('day').format();
+        }
+
         const { data: { items } } = await calendar.events.list({
-            calendarId: process.env.CALENDAR_ID,
+            calendarId: process.env.EVENTBOT_CALENDAR_ID,
             timeMin: opts.timeMin,
             timeMax: opts.timeMax,
             maxResults: opts.maxItems,
         })
         // extract only the name and the date
-        items.map((e) => res.push({person: e.summary, date: e.start.date}))
+        console.log(`GETEVENTS: ${JSON.stringify(items, {}, 2)}`)
+        items.map((e) => res.push({name: e.summary, date: e.start.date, description: e.description}))
         return res;
     } catch (error) {
-        console.log('ERROR in getBirthdays: ' + error)
+        console.log('ERROR in getEvents: ' + error)
     }
 }
 const findBirthdayChildByDate = async (opts) => {
@@ -64,7 +70,7 @@ const findBirthdayChildByDate = async (opts) => {
         opts.timeMin = dayjs(opts.date).startOf('day').format();
         opts.timeMax = dayjs(opts.date).endOf('day').format();
 
-        const arr =  await getBirthdays(opts);
+        const arr =  await getEvents(opts);
         return arr;
     } catch (error) {
         console.log(`ERROR in findBirthdayChildByDate: ${error}`);  
@@ -74,9 +80,9 @@ const findBirthdayChildByDate = async (opts) => {
 const findBirthdayChildByName = async (name) => {
     try {
         const n = name.toLowerCase();
-        const all = await getBirthdays({});
+        const all = await getEvents({});
         const matched = all.filter((b) => {
-            const nn = b.person.toLowerCase();
+            const nn = b.name.toLowerCase();
             return (nn.includes(n))
         })
         return matched;
@@ -86,7 +92,7 @@ const findBirthdayChildByName = async (name) => {
 };
 
 /**
- * Return a Markdown string of one or more people
+ * Return a Markdown string of one or more events
  * @param {*} opts 
  * @returns String
  */
@@ -97,16 +103,16 @@ const findEvent = async (opts) => {
         opts.timeMin = dayjs(opts.date).startOf('day').format();
         opts.timeMax = dayjs(opts.date).endOf('day').format();
 
-        const arr =  await getBirthdays(opts);
-        let birthdayChildren = '';
+        const arr =  await getEvents(opts);
+        let events = '';
         if (arr.length < 1) {
             return
         } else if (arr.length === 2) {
-            birthdayChildren = arr.map((p) => `*${p.person}*`).join(' and ')
+            events = arr.map((e) => `*${e.name}*`).join(' and ')
         } else {
-            birthdayChildren = arr.map((p) => `*${p.person}*`).join(', ')
+            events = arr.map((e) => `*${e.name}*`).join(', ')
         }
-        return birthdayChildren;
+        return events;
     } catch (error) {
         console.log(`ERROR in findEvent: ${error}`)
     }
@@ -114,20 +120,21 @@ const findEvent = async (opts) => {
 
 /**
  * 
- * @param {Object} data containing person and date
+ * @param {Object} data containing summary and date
  * date must use this format: 2021-12-31 
  * @returns 
  */
-const addBirthday = async (data) => {
+const addEvent = async (data) => {
     try {
         const calendar = google.calendar({
             version: 'v3', 
             auth: googleAuth()
         });
         await calendar.events.insert({
-            calendarId: process.env.CALENDAR_ID,
+            calendarId: process.env.EVENTBOT_CALENDAR_ID,
             requestBody: {
-                summary: data.person,
+                summary: data.name,
+                description: data.description,
                 recurrence: ['RRULE:FREQ=YEARLY'],
                 start: {
                     date: data.date
@@ -139,17 +146,17 @@ const addBirthday = async (data) => {
         });
         return true;
     } catch (error) {
-        console.log('ERROR in addBirthday: ' + error)
+        console.log('ERROR in addEvent: ' + error)
         return false;
     }
 };
 
 module.exports = {
-    getBirthdays,
+    getEvents,
     formatBirthdays,
     findBirthdayChildByName,
     findBirthdayChildByDate,
     byPeople,
-    addBirthday,
+    addEvent,
     findEvent
 }

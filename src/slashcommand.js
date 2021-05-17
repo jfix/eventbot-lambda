@@ -96,10 +96,10 @@ const parseString = (s) => {
 const handleAdd = async (s) => {
     try {
         // is the string valid? should be composed of "Name Whatever" followed by "on" followed by 21 November
-        const birthday = parseString(s);
+        const event = parseString(s);
 
         // if all is good call addBirthday
-        await addBirthday(birthday);
+        await addBirthday(event);
 
         // return a message confirming the good news
         return {
@@ -108,7 +108,7 @@ const handleAdd = async (s) => {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": `The birthday of ${birthday.person} (${dayjs(birthday.date).format('D MMMM')}) was successfully added.`
+                        "text": `The birthday of ${event.name} (${dayjs(event.date).format('D MMMM')}) was successfully added.`
                     }
                 }
             ]
@@ -235,7 +235,7 @@ const handleFind = async (s) => {
     } else {
         const users = await findBirthdayChildByDate({date: d.toDate()})
         if (users.length > 0) {
-            const u = users.map((u) => u.person);
+            const u = users.map((u) => u.name);
             message = {
                 "blocks": [
                     {
