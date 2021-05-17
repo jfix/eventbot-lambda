@@ -1,38 +1,64 @@
-import { findEvent } from './libs/calendar';
+import TurndownService from 'turndown';
+import { getEvents } from './libs/calendar';
 import { sendSlackMessage } from './libs/slack';
-import { image } from './libs/giphy';
 
+// need to convert potential HTML in the description to
+// Slack-flavored Markdown 
+const tds = new TurndownService();
+tds.addRule('a', {
+    filter: function (node, options) {
+      return (
+        options.linkStyle === 'inlined' &&
+        node.nodeName === 'A' &&
+        node.getAttribute('href')
+      )
+    },
+  
+    replacement: function (content, node) {
+      var href = node.getAttribute('href')
+      return '<' + content + '|' + href + '>'
+    }
+});
+  
 module.exports.handler = async () => {
     try {
-        const date = new Date();
+        // const date = new Date();
         // test date for two birthdays the same day
-        // const date = new Date(2021, 5, 19);
+        const date = new Date(2021, 4, 15);
 
-        const bdayChildren = await findEvent({date})
-        if (!bdayChildren) {
-            console.log(`No birthdays found for ${date}`)
+        const events = await getEvents({date})
+
+        if (!events) {
+            console.log(`No events found for ${date}`)
             return {}
         }
-        // get the GIPHY URL if PEOPLE were found
-        const imgUrl = await image();
-        await sendSlackMessage(process.env.SLACK_WEBHOOK_URL, {
+        if (events.length > 1) {
+            console.log(`Unable to manage more than one event right now. :-(`)
+            console.log(`${JSON.stringify(events, {}, 2)}`)
+        }
+        const event = events[0]
+
+        await sendSlackMessage(process.env.EVENTBOT_SLACK_WEBHOOK_URL, {
+            "unfurl_links": true,
             "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": `Yay, today is ${event.name}!`,
+                        "emoji": true
+                    }
+                },
+                {
+                    "type": "divider"
+                },
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": `Happy birthday, ${bdayChildren}! 🥳. Have a great day and lots of 🎂.`
+                        "text": `${tds.turndown(event.description)}`
                     }
                 },
-                {
-                    "type": "image",
-                    "image_url": imgUrl,
-                    "alt_text": "Birthday GIF",
-                    "title": {
-                        "type": "plain_text",
-                        "text": "If you know them, let them know you know! 😉"
-                    },
-                }
             ]
         });
         return {};

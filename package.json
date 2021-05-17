@@ -23,6 +23,7 @@
     "giphy-api": "^2.0.1",
     "google-auth-library": "^7.0.4",
     "googleapis": "^71.0.0",
-    "got": "^11.8.2"
+    "got": "^11.8.2",
+    "turndown": "^7.0.0"
   }
 }
