@@ -67,31 +67,31 @@ module.exports.handler = async (event) => {
     }
 };
 
-const parseString = (s) => {
-    try {
-        // should match 'Name on Day Monthname YearMaybe
-        // e.g. Jakob on 31 March 2021, Jakob on 31 Mar
-        const re = /(.+)\s+on\s+([\d][\d]?)\s+([A-Z][a-z]+)\s*(\d{4})?/
-        const a = s.match(re);
-        if (!a) throw new Error('Wrong syntax, please use "Name" on "Date"');
+// const parseString = (s) => {
+//     try {
+//         // should match 'Name on Day Monthname YearMaybe
+//         // e.g. Jakob on 31 March 2021, Jakob on 31 Mar
+//         const re = /(.+)\s+on\s+([\d][\d]?)\s+([A-Z][a-z]+)\s*(\d{4})?/
+//         const a = s.match(re);
+//         if (!a) throw new Error('Wrong syntax, please use "Name" on "Date"');
 
-        const name = a[1]
-        // use the year if it has been provided (no importance because of yearly recurrence)
-        const y = a.length > 4 && a[4] ? a[4] : dayjs().format('YYYY');
-        // parse provided string date into dayjs if possible
-        const date = dayjs(`${a[2]} ${a[3]} ${y}`, ['D MMMM YYYY', 'D MMM YYYY'], true)
-        if (!date.isValid()) throw new Error('Date is not valid');
+//         const name = a[1]
+//         // use the year if it has been provided (no importance because of yearly recurrence)
+//         const y = a.length > 4 && a[4] ? a[4] : dayjs().format('YYYY');
+//         // parse provided string date into dayjs if possible
+//         const date = dayjs(`${a[2]} ${a[3]} ${y}`, ['D MMMM YYYY', 'D MMM YYYY'], true)
+//         if (!date.isValid()) throw new Error('Date is not valid');
 
-        // return object with birthday child's name and formatted date
-        return { 
-            person: name,
-            date: date.format('YYYY-MM-DD')
-        }
-    } catch(e) {
-        console.log(`Error in parseString: ${e}`)
-        throw e;
-    }
-};
+//         // return object with birthday child's name and formatted date
+//         return { 
+//             person: name,
+//             date: date.format('YYYY-MM-DD')
+//         }
+//     } catch(e) {
+//         console.log(`Error in parseString: ${e}`)
+//         throw e;
+//     }
+// };
 
 // const handleAdd = async (s) => {
 //     try {
